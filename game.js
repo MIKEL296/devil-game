@@ -20,6 +20,12 @@ let W = canvas.width,
 let keys = {};
 let game = null;
 
+// Touch controls for mobile
+let touchControls = {
+    leftPressed: false,
+    rightPressed: false
+};
+
 class Player {
     constructor() {
         this.w = 48;
@@ -29,8 +35,8 @@ class Player {
         this.speed = 6;
     }
     update() {
-        if (keys.ArrowLeft || keys.a) this.x -= this.speed;
-        if (keys.ArrowRight || keys.d) this.x += this.speed;
+        if (keys.ArrowLeft || keys.a || touchControls.leftPressed) this.x -= this.speed;
+        if (keys.ArrowRight || keys.d || touchControls.rightPressed) this.x += this.speed;
         this.x = Math.max(0, Math.min(W - this.w, this.x));
     }
     draw() {
@@ -44,15 +50,19 @@ class Player {
 }
 
 class Devil {
-    constructor(x, y, speed, size = 28) { this.x = x;
+    constructor(x, y, speed, size = 28) {
+        this.x = x;
         this.y = y;
         this.speed = speed;
-        this.size = size }
+        this.size = size
+    }
     update(dt) { this.y += this.speed * dt }
-    draw() { ctx.fillStyle = '#ff3b30';
+    draw() {
+        ctx.fillStyle = '#ff3b30';
         ctx.beginPath();
         ctx.ellipse(this.x, this.y, this.size, this.size * 0.8, 0, 0, Math.PI * 2);
-        ctx.fill(); }
+        ctx.fill();
+    }
 }
 
 class Game {
@@ -67,15 +77,20 @@ class Game {
         this.running = false;
         this.lastTime = 0;
     }
-    start() { this.running = true;
+    start() {
+        this.running = true;
         this.lastTime = performance.now();
-        requestAnimationFrame(this.frame.bind(this)); }
+        requestAnimationFrame(this.frame.bind(this));
+    }
     stop() { this.running = false }
-    frame(t) { if (!this.running) return; const dt = (t - this.lastTime) / 16.666;
+    frame(t) {
+        if (!this.running) return;
+        const dt = (t - this.lastTime) / 16.666;
         this.lastTime = t;
         this.update(dt);
         this.draw();
-        requestAnimationFrame(this.frame.bind(this)); }
+        requestAnimationFrame(this.frame.bind(this));
+    }
     update(dt) {
         this.player.update(dt);
         // spawn logic
@@ -96,16 +111,21 @@ class Game {
                 this.lives--;
                 updateHUD();
                 if (this.lives <= 0) { this.gameOver(); return }
-            } else if (d.y > H + 50) { this.devils.splice(i, 1);
+            } else if (d.y > H + 50) {
+                this.devils.splice(i, 1);
                 this.score += 10;
-                updateHUD(); if (this.score >= this.level * 200) { this.levelUp(); } }
+                updateHUD();
+                if (this.score >= this.level * 200) { this.levelUp(); }
+            }
         }
     }
     draw() {
         ctx.clearRect(0, 0, W, H);
         // background grid
-        for (let y = 0; y < H; y += 40) { ctx.fillStyle = 'rgba(255,255,255,0.01)';
-            ctx.fillRect(0, y, W, 1) }
+        for (let y = 0; y < H; y += 40) {
+            ctx.fillStyle = 'rgba(255,255,255,0.01)';
+            ctx.fillRect(0, y, W, 1)
+        }
         this.player.draw();
         this.devils.forEach(d => d.draw());
     }
@@ -114,30 +134,70 @@ class Game {
         const dy = Math.abs(devil.y - (player.y + player.h / 2));
         return dx < (devil.size + player.w / 2) && dy < (devil.size + player.h / 2);
     }
-    levelUp() { this.level++;
+    levelUp() {
+        this.level++;
         levelEl.textContent = this.level;
         nextLevelBtn.classList.remove('hidden');
         this.stop();
         overlayTitle.textContent = 'Level Cleared!';
         overlayText.textContent = `Level ${this.level-1} cleared. Ready for level ${this.level}?`;
-        overlay.classList.remove('hidden') }
-    gameOver() { this.stop();
+        overlay.classList.remove('hidden')
+    }
+    gameOver() {
+        this.stop();
         overlayTitle.textContent = 'Game Over';
         overlayText.textContent = `Score: ${this.score}`;
         document.getElementById('nameLabel').classList.remove('hidden');
         playerNameInput.value = '';
         submitScoreBtn.classList.remove('hidden');
         restartBtn.classList.remove('hidden');
-        overlay.classList.remove('hidden') }
+        overlay.classList.remove('hidden')
+    }
 }
 
-function updateHUD() { scoreEl.textContent = game.score;
+function updateHUD() {
+    scoreEl.textContent = game.score;
     levelEl.textContent = game.level;
-    livesEl.textContent = game.lives }
+    livesEl.textContent = game.lives
+}
 
-// controls
+// controls - Keyboard
 window.addEventListener('keydown', e => { keys[e.key] = true });
 window.addEventListener('keyup', e => { keys[e.key] = false });
+
+// Touch controls for mobile devices
+canvas.addEventListener('touchstart', (e) => {
+    e.preventDefault();
+    const touch = e.touches[0];
+    const rect = canvas.getBoundingClientRect();
+    const touchX = touch.clientX - rect.left;
+
+    // Left side of canvas = move left
+    if (touchX < canvas.width / 2) {
+        touchControls.leftPressed = true;
+    }
+    // Right side of canvas = move right
+    else {
+        touchControls.rightPressed = true;
+    }
+});
+
+canvas.addEventListener('touchmove', (e) => {
+    e.preventDefault();
+    const touch = e.touches[0];
+    const rect = canvas.getBoundingClientRect();
+    const touchX = touch.clientX - rect.left;
+
+    // Update control based on current touch position
+    touchControls.leftPressed = touchX < canvas.width / 2;
+    touchControls.rightPressed = touchX >= canvas.width / 2;
+});
+
+canvas.addEventListener('touchend', (e) => {
+    e.preventDefault();
+    touchControls.leftPressed = false;
+    touchControls.rightPressed = false;
+});
 startBtn.addEventListener('click', () => {
     if (game && game.running) return;
     game = new Game();
@@ -151,18 +211,22 @@ startBtn.addEventListener('click', () => {
 nextLevelBtn.addEventListener('click', () => {
     overlay.classList.add('hidden');
     nextLevelBtn.classList.add('hidden');
-    if (game) { game.lastSpawn = 0;
+    if (game) {
+        game.lastSpawn = 0;
         game.devils = [];
-        game.start(); }
+        game.start();
+    }
 });
-restartBtn.addEventListener('click', () => { overlay.classList.add('hidden');
+restartBtn.addEventListener('click', () => {
+    overlay.classList.add('hidden');
     restartBtn.classList.add('hidden');
     submitScoreBtn.classList.add('hidden');
     document.getElementById('nameLabel').classList.add('hidden');
     startBtn.classList.remove('hidden');
     game = null;
     updateHUD();
-    loadHighscores(); });
+    loadHighscores();
+});
 closeOverlay.addEventListener('click', () => { overlay.classList.add('hidden'); })
 submitScoreBtn.addEventListener('click', async() => {
     const name = playerNameInput.value.trim() || 'Player';
@@ -179,12 +243,35 @@ async function loadHighscores() {
         const res = await fetch('/api/highscores');
         const list = await res.json();
         highscoreList.innerHTML = '';
-        list.slice(0, 10).forEach(h => { const li = document.createElement('li');
+        list.slice(0, 10).forEach(h => {
+            const li = document.createElement('li');
             li.textContent = `${h.name} — ${h.score}`;
-            highscoreList.appendChild(li) })
+            highscoreList.appendChild(li)
+        })
     } catch (e) { console.error(e) }
 }
 
 // initial
 updateHUD();
 loadHighscores();
+
+// Detect device type and show appropriate controls
+function detectDeviceAndShowControls() {
+    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ||
+        (window.innerWidth < 768);
+
+    const pcControls = document.querySelector('.pc-controls');
+    const mobileControls = document.querySelector('.mobile-controls');
+
+    if (isMobile) {
+        if (pcControls) pcControls.style.display = 'none';
+        if (mobileControls) mobileControls.style.display = 'inline';
+    } else {
+        if (pcControls) pcControls.style.display = 'inline';
+        if (mobileControls) mobileControls.style.display = 'none';
+    }
+}
+
+// Run on page load and on resize
+window.addEventListener('load', detectDeviceAndShowControls);
+window.addEventListener('resize', detectDeviceAndShowControls);

@@ -165,10 +165,11 @@ function updateHUD() {
 window.addEventListener('keydown', e => { keys[e.key] = true });
 window.addEventListener('keyup', e => { keys[e.key] = false });
 
-// Touch controls for mobile devices - Track swipes and touches
+// Touch controls for mobile devices - Track swipes and touches in both directions
 let touchStartX = 0;
 let touchStartY = 0;
 let currentTouchX = 0;
+const SWIPE_THRESHOLD = 10; // minimum pixels to detect a swipe
 
 document.addEventListener('touchstart', (e) => {
     const touch = e.touches[0];
@@ -178,21 +179,22 @@ document.addEventListener('touchstart', (e) => {
 }, { passive: true });
 
 document.addEventListener('touchmove', (e) => {
+    if (e.touches.length === 0) return;
+
     const touch = e.touches[0];
     currentTouchX = touch.clientX;
 
-    const rect = canvas.getBoundingClientRect();
-    const touchXOnCanvas = currentTouchX - rect.left;
+    // Calculate swipe distance
+    const swipeDistance = currentTouchX - touchStartX;
 
-    // Detect swipe direction and control movement
-    if (touchXOnCanvas >= 0 && touchXOnCanvas <= canvas.width) {
-        // Left half of canvas = move left
-        if (touchXOnCanvas < canvas.width / 2) {
+    // Detect swipe direction based on how far the finger has moved
+    if (Math.abs(swipeDistance) > SWIPE_THRESHOLD) {
+        if (swipeDistance < 0) {
+            // Swiping LEFT (moving from right to left)
             touchControls.leftPressed = true;
             touchControls.rightPressed = false;
-        }
-        // Right half of canvas = move right
-        else {
+        } else {
+            // Swiping RIGHT (moving from left to right)
             touchControls.rightPressed = true;
             touchControls.leftPressed = false;
         }

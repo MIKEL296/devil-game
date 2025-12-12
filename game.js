@@ -41,7 +41,7 @@ class Player {
         this.h = 24;
         this.x = W / 2 - this.w / 2;
         this.y = H - this.h - 10;
-        this.speed = 6;
+        this.speed = 3;
     }
     update() {
         if (keys.ArrowLeft || keys.a || touchControls.leftPressed || mouseControls.leftPressed) this.x -= this.speed;

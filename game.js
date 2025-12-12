@@ -2,6 +2,7 @@
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
 const startBtn = document.getElementById('startBtn');
+const pauseBtn = document.getElementById('pauseBtn');
 const nextLevelBtn = document.getElementById('nextLevelBtn');
 const restartBtn = document.getElementById('restartBtn');
 const overlay = document.getElementById('overlay');
@@ -269,12 +270,31 @@ startBtn.addEventListener('click', () => {
     game.start();
     overlay.classList.add('hidden');
     startBtn.classList.add('hidden');
+    pauseBtn.classList.remove('hidden');
     nextLevelBtn.classList.add('hidden');
     restartBtn.classList.add('hidden');
+});
+pauseBtn.addEventListener('click', () => {
+    if (!game || !game.running) return;
+    game.stop();
+    overlayTitle.textContent = 'Game Paused';
+    overlayText.textContent = 'Click Resume to continue playing.';
+    document.getElementById('resumeBtn').classList.remove('hidden');
+    overlay.classList.remove('hidden');
+    pauseBtn.classList.add('hidden');
+});
+document.getElementById('resumeBtn').addEventListener('click', () => {
+    if (!game) return;
+    overlay.classList.add('hidden');
+    document.getElementById('resumeBtn').classList.add('hidden');
+    pauseBtn.classList.remove('hidden');
+    game.start();
 });
 nextLevelBtn.addEventListener('click', () => {
     overlay.classList.add('hidden');
     nextLevelBtn.classList.add('hidden');
+    document.getElementById('resumeBtn').classList.add('hidden');
+    pauseBtn.classList.remove('hidden');
     if (game) {
         game.lastSpawn = 0;
         game.devils = [];
@@ -286,7 +306,9 @@ restartBtn.addEventListener('click', () => {
     restartBtn.classList.add('hidden');
     submitScoreBtn.classList.add('hidden');
     document.getElementById('nameLabel').classList.add('hidden');
+    document.getElementById('resumeBtn').classList.add('hidden');
     startBtn.classList.remove('hidden');
+    pauseBtn.classList.add('hidden');
     game = null;
     updateHUD();
     loadHighscores();

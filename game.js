@@ -26,6 +26,15 @@ let touchControls = {
     rightPressed: false
 };
 
+// Mouse controls for desktop
+let mouseControls = {
+    leftPressed: false,
+    rightPressed: false
+};
+let mouseStartX = 0;
+let mouseCurrentX = 0;
+let isMouseDown = false;
+
 class Player {
     constructor() {
         this.w = 48;
@@ -35,8 +44,8 @@ class Player {
         this.speed = 6;
     }
     update() {
-        if (keys.ArrowLeft || keys.a || touchControls.leftPressed) this.x -= this.speed;
-        if (keys.ArrowRight || keys.d || touchControls.rightPressed) this.x += this.speed;
+        if (keys.ArrowLeft || keys.a || touchControls.leftPressed || mouseControls.leftPressed) this.x -= this.speed;
+        if (keys.ArrowRight || keys.d || touchControls.rightPressed || mouseControls.rightPressed) this.x += this.speed;
         this.x = Math.max(0, Math.min(W - this.w, this.x));
     }
     draw() {
@@ -165,21 +174,62 @@ function updateHUD() {
 window.addEventListener('keydown', e => { keys[e.key] = true });
 window.addEventListener('keyup', e => { keys[e.key] = false });
 
-// Touch controls for mobile devices - Track swipes and touches in both directions
+// Mouse Controls - Track mouse movement and clicks
+document.addEventListener('mousedown', (e) => {
+    const rect = canvas.getBoundingClientRect();
+    mouseStartX = e.clientX - rect.left;
+    mouseCurrentX = mouseStartX;
+    isMouseDown = true;
+}, { passive: true });
+
+document.addEventListener('mousemove', (e) => {
+    if (!isMouseDown) return;
+
+    const rect = canvas.getBoundingClientRect();
+    mouseCurrentX = e.clientX - rect.left;
+
+    // Calculate mouse movement distance
+    const mouseDistance = mouseCurrentX - mouseStartX;
+
+    // Detect mouse drag direction
+    if (Math.abs(mouseDistance) > 5) {
+        if (mouseDistance < 0) {
+            // Moving LEFT (mouse moving right to left)
+            mouseControls.leftPressed = true;
+            mouseControls.rightPressed = false;
+        } else {
+            // Moving RIGHT (mouse moving left to right)
+            mouseControls.rightPressed = true;
+            mouseControls.leftPressed = false;
+        }
+    }
+}, { passive: true });
+
+document.addEventListener('mouseup', (e) => {
+    mouseControls.leftPressed = false;
+    mouseControls.rightPressed = false;
+    isMouseDown = false;
+    mouseStartX = 0;
+    mouseCurrentX = 0;
+}, { passive: true });
+
+// Touch Controls - Track swipes and touches in both directions
 let touchStartX = 0;
 let touchStartY = 0;
 let currentTouchX = 0;
 const SWIPE_THRESHOLD = 10; // minimum pixels to detect a swipe
+let isTouching = false;
 
 document.addEventListener('touchstart', (e) => {
     const touch = e.touches[0];
     touchStartX = touch.clientX;
     touchStartY = touch.clientY;
     currentTouchX = touchStartX;
+    isTouching = true;
 }, { passive: true });
 
 document.addEventListener('touchmove', (e) => {
-    if (e.touches.length === 0) return;
+    if (e.touches.length === 0 || !isTouching) return;
 
     const touch = e.touches[0];
     currentTouchX = touch.clientX;
@@ -190,11 +240,11 @@ document.addEventListener('touchmove', (e) => {
     // Detect swipe direction based on how far the finger has moved
     if (Math.abs(swipeDistance) > SWIPE_THRESHOLD) {
         if (swipeDistance < 0) {
-            // Swiping LEFT (moving from right to left)
+            // Swiping LEFT (moving from right to left on screen)
             touchControls.leftPressed = true;
             touchControls.rightPressed = false;
-        } else {
-            // Swiping RIGHT (moving from left to right)
+        } else if (swipeDistance > 0) {
+            // Swiping RIGHT (moving from left to right on screen)
             touchControls.rightPressed = true;
             touchControls.leftPressed = false;
         }
@@ -204,6 +254,7 @@ document.addEventListener('touchmove', (e) => {
 document.addEventListener('touchend', (e) => {
     touchControls.leftPressed = false;
     touchControls.rightPressed = false;
+    isTouching = false;
     touchStartX = 0;
     touchStartY = 0;
     currentTouchX = 0;

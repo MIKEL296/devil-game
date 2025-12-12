@@ -165,39 +165,47 @@ function updateHUD() {
 window.addEventListener('keydown', e => { keys[e.key] = true });
 window.addEventListener('keyup', e => { keys[e.key] = false });
 
-// Touch controls for mobile devices
-canvas.addEventListener('touchstart', (e) => {
-    e.preventDefault();
+// Touch controls for mobile devices - Track swipes and touches
+let touchStartX = 0;
+let touchStartY = 0;
+let currentTouchX = 0;
+
+document.addEventListener('touchstart', (e) => {
     const touch = e.touches[0];
-    const rect = canvas.getBoundingClientRect();
-    const touchX = touch.clientX - rect.left;
+    touchStartX = touch.clientX;
+    touchStartY = touch.clientY;
+    currentTouchX = touchStartX;
+}, { passive: true });
 
-    // Left side of canvas = move left
-    if (touchX < canvas.width / 2) {
-        touchControls.leftPressed = true;
-    }
-    // Right side of canvas = move right
-    else {
-        touchControls.rightPressed = true;
-    }
-});
-
-canvas.addEventListener('touchmove', (e) => {
-    e.preventDefault();
+document.addEventListener('touchmove', (e) => {
     const touch = e.touches[0];
+    currentTouchX = touch.clientX;
+
     const rect = canvas.getBoundingClientRect();
-    const touchX = touch.clientX - rect.left;
+    const touchXOnCanvas = currentTouchX - rect.left;
 
-    // Update control based on current touch position
-    touchControls.leftPressed = touchX < canvas.width / 2;
-    touchControls.rightPressed = touchX >= canvas.width / 2;
-});
+    // Detect swipe direction and control movement
+    if (touchXOnCanvas >= 0 && touchXOnCanvas <= canvas.width) {
+        // Left half of canvas = move left
+        if (touchXOnCanvas < canvas.width / 2) {
+            touchControls.leftPressed = true;
+            touchControls.rightPressed = false;
+        }
+        // Right half of canvas = move right
+        else {
+            touchControls.rightPressed = true;
+            touchControls.leftPressed = false;
+        }
+    }
+}, { passive: true });
 
-canvas.addEventListener('touchend', (e) => {
-    e.preventDefault();
+document.addEventListener('touchend', (e) => {
     touchControls.leftPressed = false;
     touchControls.rightPressed = false;
-});
+    touchStartX = 0;
+    touchStartY = 0;
+    currentTouchX = 0;
+}, { passive: true });
 startBtn.addEventListener('click', () => {
     if (game && game.running) return;
     game = new Game();

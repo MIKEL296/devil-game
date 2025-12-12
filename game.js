@@ -80,7 +80,7 @@ class Game {
         this.player = new Player();
         this.devils = [];
         this.lastSpawn = 0;
-        this.spawnInterval = 1200; // ms
+        this.spawnInterval = 900; // ms - reduced from 1200 for faster spawning
         this.level = 1;
         this.score = 0;
         this.lives = 3;
@@ -105,11 +105,11 @@ class Game {
         this.player.update(dt);
         // spawn logic
         this.lastSpawn += dt * 16.666;
-        const interval = Math.max(350, this.spawnInterval - (this.level - 1) * 100);
+        const interval = Math.max(250, this.spawnInterval - (this.level - 1) * 120);
         if (this.lastSpawn > interval) {
             this.lastSpawn = 0;
             const x = Math.random() * (W - 40) + 20;
-            const speed = 1 + this.level * 0.5 + Math.random() * this.level * 0.6;
+            const speed = 2 + this.level * 0.8 + Math.random() * this.level * 0.8;
             this.devils.push(new Devil(x, -40, speed, 18 + Math.random() * 18));
         }
         // update devils
@@ -125,7 +125,7 @@ class Game {
                 this.devils.splice(i, 1);
                 this.score += 10;
                 updateHUD();
-                if (this.score >= this.level * 200) { this.levelUp(); }
+                if (this.score >= this.level * 150) { this.levelUp(); }
             }
         }
     }

@@ -234,19 +234,22 @@ document.addEventListener('touchmove', (e) => {
     const touch = e.touches[0];
     currentTouchX = touch.clientX;
 
-    // Calculate swipe distance
-    const swipeDistance = currentTouchX - touchStartX;
+    const rect = canvas.getBoundingClientRect();
+    const touchXOnCanvas = currentTouchX - rect.left;
 
-    // Detect swipe direction based on how far the finger has moved
-    if (Math.abs(swipeDistance) > SWIPE_THRESHOLD) {
-        if (swipeDistance < 0) {
-            // Swiping LEFT (moving from right to left on screen)
+    // Reset both flags first
+    touchControls.leftPressed = false;
+    touchControls.rightPressed = false;
+
+    // Check if touch is on canvas
+    if (touchXOnCanvas >= 0 && touchXOnCanvas <= canvas.width) {
+        // Left side of canvas = move left
+        if (touchXOnCanvas < canvas.width / 2) {
             touchControls.leftPressed = true;
-            touchControls.rightPressed = false;
-        } else if (swipeDistance > 0) {
-            // Swiping RIGHT (moving from left to right on screen)
+        }
+        // Right side of canvas = move right
+        else {
             touchControls.rightPressed = true;
-            touchControls.leftPressed = false;
         }
     }
 }, { passive: true });

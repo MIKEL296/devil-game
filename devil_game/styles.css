@@ -1,0 +1,121 @@
+:root {
+    --bg: #0b0b0f;
+    --panel: #0f1720;
+    --accent: #ff3b30;
+    --muted: #9aa6b2
+}
+
+* {
+    box-sizing: border-box
+}
+
+body {
+    margin: 0;
+    font-family: Segoe UI, Arial;
+    background: linear-gradient(180deg, #05060a, #0a0b0f);
+    color: #e6eef3
+}
+
+.wrap {
+    max-width: 980px;
+    margin: 12px auto;
+    padding: 12px
+}
+
+header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center
+}
+
+.hud {
+    display: flex;
+    gap: 12px;
+    font-weight: 600;
+    color: var(--muted)
+}
+
+main {
+    display: flex;
+    gap: 16px
+}
+
+canvas {
+    background: linear-gradient(180deg, #071018, #061419);
+    border-radius: 8px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6)
+}
+
+.controls {
+    display: flex;
+    gap: 8px;
+    margin-top: 8px
+}
+
+button {
+    padding: 8px 12px;
+    border-radius: 6px;
+    border: none;
+    background: var(--accent);
+    color: #fff;
+    cursor: pointer
+}
+
+button.hidden {
+    display: none
+}
+
+.overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.6);
+    display: flex;
+    align-items: center;
+    justify-content: center
+}
+
+.overlay.hidden {
+    display: none
+}
+
+.panel {
+    background: var(--panel);
+    padding: 16px;
+    border-radius: 8px;
+    min-width: 300px
+}
+
+.panel-actions {
+    display: flex;
+    gap: 8px;
+    margin-top: 8px
+}
+
+.highscores {
+    width: 260px;
+    padding: 8px;
+    background: rgba(255, 255, 255, 0.02);
+    border-radius: 8px
+}
+
+.highscores h3 {
+    margin: 4px 0
+}
+
+footer {
+    margin-top: 12px;
+    text-align: center;
+    color: var(--muted)
+}
+
+@media (max-width:900px) {
+    .wrap {
+        padding: 8px
+    }
+    main {
+        flex-direction: column
+    }
+    .highscores {
+        width: 100%
+    }
+}

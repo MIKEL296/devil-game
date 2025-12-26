@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Devil Levels</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+    <div class="wrap">
+        <header>
+            <h1>Devil Levels</h1>
+            <div class="hud">
+                <div>Level: <span id="level">1</span></div>
+                <div>Score: <span id="score">0</span></div>
+                <div>Lives: <span id="lives">3</span></div>
+            </div>
+        </header>
+
+        <main>
+            <canvas id="gameCanvas" width="800" height="500"></canvas>
+            <div class="controls">
+                <button id="startBtn">Start</button>
+                <button id="pauseBtn" class="hidden">Pause</button>
+                <button id="nextLevelBtn" class="hidden">Next Level</button>
+                <button id="restartBtn" class="hidden">Restart</button>
+            </div>
+
+            <div id="overlay" class="overlay hidden">
+                <div class="panel">
+                    <h2 id="overlayTitle">Paused</h2>
+                    <p id="overlayText">Press Start to play.</p>
+                    <label id="nameLabel" class="hidden">Name: <input id="playerName" maxlength="16"/></label>
+                    <div class="panel-actions">
+                        <button id="resumeBtn" class="hidden">Resume</button>
+                        <button id="submitScoreBtn" class="hidden">Submit Score</button>
+                        <button id="closeOverlay">Close</button>
+                    </div>
+                </div>
+            </div>
+
+            <section class="highscores">
+                <h3>Highscores</h3>
+                <ol id="highscoreList"></ol>
+            </section>
+        </main>
+
+        <footer>
+            <small id="controlsText">
+                <span class="pc-controls">Move with left/right arrows or A/D. Avoid the devils!</span>
+                <span class="mobile-controls" style="display:none;">Touch left/right side of screen to move. Avoid the devils!</span>
+            </small>
+        </footer>
+    </div>
+
+    <script src="game.js"></script>
+</body>
+
+</html>
